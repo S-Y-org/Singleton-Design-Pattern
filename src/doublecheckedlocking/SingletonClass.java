@@ -1,6 +1,9 @@
 package doublecheckedlocking;
 /*If u plan to implement a Singleton in a
-multi-threaded environment u can do it like shown below.*/
+multithreaded environment u can do it like shown below.
+
+This we also called as Thread Safe Block Initialization
+*/
 
 public class SingletonClass {
     private static volatile SingletonClass instance = null;
@@ -8,10 +11,10 @@ public class SingletonClass {
     private SingletonClass() {
     }
 
-    public static SingletonClass getInstance(){
-        if(instance == null){
-            synchronized (SingletonClass.class){
-                if(instance == null){
+    public static SingletonClass getInstance() {
+        if (instance == null) {
+            synchronized (SingletonClass.class) {
+                if (instance == null) {
                     instance = new SingletonClass();
                 }
             }
@@ -19,6 +22,26 @@ public class SingletonClass {
         return instance;
     }
 }
+
+
+/*By making only the block synchronized instead of the entire method provides a performance optimization known as double-checked locking. This technique is used to minimize the overhead of synchronization and improve the overall efficiency of creating a singleton instance.
+
+Here's how it works:
+
+1. When multiple threads concurrently access the `getInstance()` method, they first check if the `instance` is `null`.
+2. If the `instance` is `null`, multiple threads may enter the outer `if` condition simultaneously.
+3. However, by making only the block within the synchronized section, denoted by `synchronized (SingletonClass.class) { ... }`, threads are allowed to enter this block one at a time.
+4. Once inside the synchronized block, each thread checks if the `instance` is still `null`.
+5. If the `instance` is `null`, the first thread to enter the synchronized block initializes the `instance` by creating a new `SingletonClass()` object.
+6. Subsequent threads that enter the synchronized block, while the first thread is still inside, will see that the `instance` is no longer `null` and will skip the creation step.
+7. Finally, all threads return the same instance of the `SingletonClass`.
+
+By using this double-checked locking approach, synchronization is only applied during the critical section where the instance is created. This reduces the overhead of acquiring and releasing the lock on each invocation of the `getInstance()` method, thus improving performance.
+
+It's important to note that this technique requires the `instance` variable to be declared as `volatile` to ensure proper memory visibility across threads. This guarantees that changes made to the `instance` variable inside the synchronized block are immediately visible to other threads.
+
+However, it's worth mentioning that with modern versions of Java (Java 5 and later), the use of `volatile` and double-checked locking is no longer necessary for most cases of singleton implementation. The `volatile` keyword and other features provided by the `java.util.concurrent` package offer more efficient and safer ways to implement singletons.*/
+
 
 /*
 Something that can happen in a multi-threaded environment is that, at the null check, two thread might encounter that there is no instance created.
